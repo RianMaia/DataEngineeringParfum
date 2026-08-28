@@ -1,0 +1,24 @@
+resources:
+  schemas:
+    bronze:
+      name: bronze
+      catalog_name: ${var.catalog}
+      comment: Camada de chegada para dados brutos e controles de ingestao.
+
+    silver:
+      name: silver
+      catalog_name: ${var.catalog}
+      comment: Camada de dados limpos, validados e padronizados.
+
+    gold:
+      name: gold
+      catalog_name: ${var.catalog}
+      comment: Camada de dados agregados e prontos para consumo analitico.
+
+  volumes:
+    raw:
+      name: raw
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.bronze.name}
+      volume_type: MANAGED
+      comment: Area gerenciada de chegada dos arquivos CSV originais de ERP e CRM.

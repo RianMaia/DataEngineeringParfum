@@ -1,0 +1,11 @@
+resources:
+  job_runs:
+    preparar_views_genie:
+      job_id: ${resources.jobs.rotaperfume_pipeline.id}
+      job_parameters:
+        catalog: ${var.catalog}
+      only:
+        - metricas_de_negocio
+      lifecycle:
+        triggers:
+          - on_bundle_deploy: true

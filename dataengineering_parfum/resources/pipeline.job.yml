@@ -1,0 +1,146 @@
+# O job mantem uma unica orquestracao. As quatro tarefas Silver iniciam em
+# paralelo; a Gold converge as quatro e abre duas validacoes bloqueantes.
+resources:
+  jobs:
+    rotaperfume_pipeline:
+      name: rotaperfume_pipeline
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: America/Sao_Paulo
+        pause_status: UNPAUSED
+
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+
+      tasks:
+        - task_key: raw_conferencia
+          notebook_task:
+            notebook_path: ../src/raw/conferencia.py
+
+        - task_key: bronze_ingestao
+          depends_on:
+            - task_key: raw_conferencia
+          notebook_task:
+            notebook_path: ../src/bronze/ingestao.py
+
+        - task_key: silver_clientes
+          depends_on:
+            - task_key: bronze_ingestao
+          sql_task:
+            file:
+              path: ../src/silver/01-clientes.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: silver_pedidos
+          depends_on:
+            - task_key: bronze_ingestao
+          sql_task:
+            file:
+              path: ../src/silver/02-pedidos.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: silver_itens_produtos
+          depends_on:
+            - task_key: bronze_ingestao
+          sql_task:
+            file:
+              path: ../src/silver/03-itens-e-produtos.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: silver_crm_financeiro
+          depends_on:
+            - task_key: bronze_ingestao
+          sql_task:
+            file:
+              path: ../src/silver/04-crm-e-financeiro.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: gold_dimensoes
+          depends_on:
+            - task_key: silver_clientes
+            - task_key: silver_pedidos
+            - task_key: silver_itens_produtos
+            - task_key: silver_crm_financeiro
+          sql_task:
+            file:
+              path: ../src/gold/05-dimensoes.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: gold_fato_vendas
+          depends_on:
+            - task_key: gold_dimensoes
+          sql_task:
+            file:
+              path: ../src/gold/06-fato-vendas.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: gold_marts
+          depends_on:
+            - task_key: gold_fato_vendas
+          sql_task:
+            file:
+              path: ../src/gold/07-marts.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: metricas_de_negocio
+          depends_on:
+            - task_key: gold_marts
+          sql_task:
+            file:
+              path: ../src/gold/09-metricas-negocio.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: auditoria_de_metadado
+          depends_on:
+            - task_key: metricas_de_negocio
+          sql_task:
+            file:
+              path: ../src/gold/10-auditoria-metadado.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: testes
+          depends_on:
+            - task_key: gold_marts
+          sql_task:
+            file:
+              path: ../src/gold/08-testes.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+        - task_key: ml_features
+          depends_on:
+            - task_key: testes
+          notebook_task:
+            notebook_path: ../src/ml/11-features.py
+
+        - task_key: ml_modelo
+          depends_on:
+            - task_key: ml_features
+          environment_key: default
+          notebook_task:
+            notebook_path: ../src/ml/12-modelo.py
+
+        - task_key: ml_fila
+          depends_on:
+            - task_key: ml_modelo
+          sql_task:
+            file:
+              path: ../src/ml/13-fila.sql
+              source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+
+      # Sem configuracao de cluster: a tarefa usa compute serverless.
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"

@@ -1,0 +1,31 @@
+# Declarative Automation Bundle for the Rota Perfume lakehouse.
+bundle:
+  name: rotaperfume
+  uuid: 67d016d8-af63-4868-b198-bc64e692a862
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog used by every lakehouse layer.
+    default: lakehouse_rotaperfume
+  warehouse_id:
+    description: SQL warehouse used by administrative scripts.
+    default: 107dd2f1b9c84d4d
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://dbc-05c330a0-c65a.cloud.databricks.com
+    # Do not use mode: development here: it prefixes resource names, including
+    # schemas, and would break SQL that expects bronze, silver, and gold.
+    presets:
+      trigger_pause_status: PAUSED
+
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-05c330a0-c65a.cloud.databricks.com
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}

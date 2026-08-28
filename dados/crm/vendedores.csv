@@ -1,0 +1,43 @@
+vendedor_id,nome,regiao,uf,data_admissao,data_desligamento,meta_mensal
+1,Henrique Rodrigues,Curitiba,PR,2021-01-01,2025-09-07,40000
+2,Carla Carvalho,Brasília,DF,2020-10-17,,40000
+3,Thiago Silva,Brasília,DF,2024-06-02,2025-07-26,100000
+4,Rafael Carvalho,Manaus,AM,2023-06-22,,55000
+5,Zeca Ferreira,São Paulo,SP,2022-01-26,,85000
+6,Zeca Costa,Curitiba,PR,2022-09-06,,40000
+7,Débora Ribeiro,Salvador,BA,2024-01-26,,100000
+8,Olívia Fernandes,Manaus,AM,2023-02-08,,40000
+9,Thiago Ribeiro,Campinas,SP,2022-06-19,2025-09-26,100000
+10,Vinícius Pereira,São Paulo,SP,2023-07-06,,70000
+11,Mariana Lima,Rio de Janeiro,RJ,2024-02-21,,85000
+12,Lucas Ribeiro,Belo Horizonte,MG,2021-01-09,,55000
+13,Ursula Oliveira,Campinas,SP,2020-10-30,,100000
+14,Henrique Ferreira,Manaus,AM,2021-01-10,,85000
+15,Wagner Fernandes,Campinas,SP,2022-06-17,,55000
+16,Henrique Santos,São Paulo,SP,2020-09-30,,70000
+17,Fernanda Costa,Curitiba,PR,2022-05-04,,55000
+18,Olívia Rodrigues,Campinas,SP,2020-11-29,,70000
+19,Rafael Lima,Brasília,DF,2023-10-22,,100000
+20,Lucas Pereira,Recife,PE,2022-03-09,,55000
+21,Débora Souza,São Paulo,SP,2021-09-24,,55000
+22,Nathan Oliveira,Campinas,SP,2021-01-25,,85000
+23,Queila Lima,Fortaleza,CE,2022-06-13,,100000
+24,Vinícius Fernandes,Rio de Janeiro,RJ,2024-07-10,,70000
+25,Nathan Ferreira,Porto Alegre,RS,2020-12-29,,85000
+26,Isabela Soares,Manaus,AM,2024-07-27,,55000
+27,João Soares,Campinas,SP,2021-09-28,,100000
+28,Rafael Soares,Belo Horizonte,MG,2023-06-22,,40000
+29,Diego Ribeiro,São Paulo,SP,2021-03-25,,70000
+30,Carla Lopes,Rio de Janeiro,RJ,2023-03-31,2026-07-03,40000
+31,Vinícius Lopes,Belo Horizonte,MG,2021-08-08,,100000
+32,Nathan Alves,Goiânia,GO,2023-08-30,,100000
+33,Mariana Ribeiro,Porto Alegre,RS,2020-09-20,,85000
+34,Henrique Oliveira,Curitiba,PR,2021-09-08,,70000
+35,Sabrina Pereira,Curitiba,PR,2024-06-20,,40000
+36,Henrique Oliveira,São Paulo,SP,2024-03-10,,40000
+37,Vinícius Lopes,Porto Alegre,RS,2022-09-26,2025-07-31,55000
+38,Paulo Pereira,Goiânia,GO,2021-07-25,2026-07-07,85000
+39,Vinícius Carvalho,Rio de Janeiro,RJ,2022-04-22,,70000
+40,Bruno Souza,Manaus,AM,2022-03-19,,40000
+41,Henrique Alves,Rio de Janeiro,RJ,2022-05-01,,55000
+42,Felipe Lima,Recife,PE,2021-07-31,,85000

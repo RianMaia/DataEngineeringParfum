@@ -1,0 +1,625 @@
+{
+  "datasets": [
+    {
+      "name": "ds_vendas",
+      "displayName": "Vendas comerciais",
+      "queryLines": [
+        "WITH vendas AS (\n",
+        "  SELECT item_id, pedido_id, data_pedido, ano, mes, canal, cliente_id, razao_social,\n",
+        "         segmento, cidade, marca, categoria, receita, margem,\n",
+        "         SUM(receita) OVER (PARTITION BY cliente_id) AS receita_cliente\n",
+        "  FROM fato_vendas\n",
+        "),\n",
+        "vendas_ranqueadas AS (\n",
+        "  SELECT item_id, pedido_id, data_pedido, ano, mes, canal, cliente_id, razao_social,\n",
+        "         segmento, cidade, marca, categoria, receita, margem,\n",
+        "         DENSE_RANK() OVER (ORDER BY receita_cliente DESC) AS ranking_cliente\n",
+        "  FROM vendas\n",
+        ")\n",
+        "SELECT item_id, pedido_id, data_pedido, ano, mes, canal, cliente_id, razao_social,\n",
+        "       segmento, cidade, marca, categoria, receita, margem, ranking_cliente\n",
+        "FROM vendas_ranqueadas "
+      ],
+      "columns": [
+        {
+          "displayName": "Receita",
+          "description": "Receita líquida de vendas, incluindo devoluções",
+          "expression": "SUM(`receita`)"
+        },
+        {
+          "displayName": "Margem",
+          "description": "Receita menos custo dos produtos",
+          "expression": "SUM(`margem`)"
+        },
+        {
+          "displayName": "Pedidos",
+          "description": "Quantidade distinta de pedidos não cancelados",
+          "expression": "COUNT(DISTINCT `pedido_id`)"
+        },
+        {
+          "displayName": "Ticket Médio",
+          "description": "Receita líquida dividida pela quantidade de pedidos",
+          "expression": "SUM(`receita`) / NULLIF(COUNT(DISTINCT `pedido_id`), 0)"
+        },
+        {
+          "displayName": "Margem Percentual",
+          "description": "Margem dividida pela receita líquida",
+          "expression": "SUM(`margem`) / NULLIF(SUM(`receita`), 0)"
+        }
+      ]
+    },
+    {
+      "name": "ds_fila",
+      "displayName": "Fila comercial da semana",
+      "queryLines": [
+        "SELECT vendedor, ordem, cliente_id, razao_social, cidade, uf, score, faixa, ticket_medio, motivo, sugestao\n",
+        "FROM fila_semanal\n",
+        "ORDER BY vendedor, ordem"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "visao-comercial",
+      "displayName": "Visão Comercial",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {
+          "widget": {
+            "name": "titulo",
+            "multilineTextboxSpec": {
+              "lines": ["# Rota Perfume — Visão Comercial"]
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "subtitulo",
+            "multilineTextboxSpec": {
+              "lines": ["Receita, margem e desempenho comercial nos 24 meses. Use os filtros ou clique nas barras para explorar o mesmo conjunto de vendas."]
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "filtro-ano",
+            "queries": [
+              {
+                "name": "ds_vendas_ano",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [{"name": "ano", "expression": "`ano`"}],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [{"fieldName": "ano", "displayName": "Ano", "queryName": "ds_vendas_ano"}]
+              },
+              "frame": {"showTitle": true, "title": "Ano"}
+            }
+          },
+          "position": {"x": 0, "y": 2, "width": 4, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "filtro-segmento",
+            "queries": [
+              {
+                "name": "ds_vendas_segmento",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [{"name": "segmento", "expression": "`segmento`"}],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {"fieldName": "segmento", "displayName": "Segmento", "queryName": "ds_vendas_segmento"}
+                ]
+              },
+              "frame": {"showTitle": true, "title": "Segmento"}
+            }
+          },
+          "position": {"x": 4, "y": 2, "width": 4, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "filtro-cidade",
+            "queries": [
+              {
+                "name": "ds_vendas_cidade",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [{"name": "cidade", "expression": "`cidade`"}],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [{"fieldName": "cidade", "displayName": "Cidade", "queryName": "ds_vendas_cidade"}]
+              },
+              "frame": {"showTitle": true, "title": "Cidade"}
+            }
+          },
+          "position": {"x": 8, "y": 2, "width": 4, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "kpi-receita",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [{"name": "measure(Receita)", "expression": "MEASURE(`Receita`)"}],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(Receita)",
+                  "displayName": "Receita",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "BRL",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {"type": "max", "places": 2}
+                  }
+                }
+              },
+              "frame": {"showTitle": true, "title": "Receita Total"}
+            }
+          },
+          "position": {"x": 0, "y": 4, "width": 3, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "kpi-margem",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [{"name": "measure(Margem)", "expression": "MEASURE(`Margem`)"}],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(Margem)",
+                  "displayName": "Margem",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "BRL",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {"type": "max", "places": 2}
+                  }
+                }
+              },
+              "frame": {"showTitle": true, "title": "Margem Total"}
+            }
+          },
+          "position": {"x": 3, "y": 4, "width": 3, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "kpi-pedidos",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [{"name": "measure(Pedidos)", "expression": "MEASURE(`Pedidos`)"}],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "measure(Pedidos)", "displayName": "Pedidos"}
+              },
+              "frame": {"showTitle": true, "title": "Número de Pedidos"}
+            }
+          },
+          "position": {"x": 6, "y": 4, "width": 3, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "kpi-ticket-medio",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [
+                    {"name": "measure(Ticket Médio)", "expression": "MEASURE(`Ticket Médio`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(Ticket Médio)",
+                  "displayName": "Ticket Médio",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "BRL",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {"type": "max", "places": 2}
+                  }
+                }
+              },
+              "frame": {"showTitle": true, "title": "Ticket Médio"}
+            }
+          },
+          "position": {"x": 9, "y": 4, "width": 3, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "receita-mensal",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [
+                    {"name": "monthly(data_pedido)", "expression": "DATE_TRUNC(\"MONTH\", `data_pedido`)"},
+                    {"name": "measure(Receita)", "expression": "MEASURE(`Receita`)"}
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {"direction": "ASC", "expression": "DATE_TRUNC(\"MONTH\", `data_pedido`)"}
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {"fieldName": "monthly(data_pedido)", "scale": {"type": "temporal"}},
+                "y": {
+                  "fieldName": "measure(Receita)",
+                  "displayName": "Receita",
+                  "scale": {"type": "quantitative", "domainMin": 0},
+                  "format": {"type": "number-currency", "currencyCode": "BRL", "abbreviation": "compact"}
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Receita por Mês — 24 meses",
+                "showDescription": true,
+                "description": "Evolução mensal da receita líquida, incluindo devoluções."
+              }
+            }
+          },
+          "position": {"x": 0, "y": 7, "width": 12, "height": 6}
+        },
+        {
+          "widget": {
+            "name": "top-marcas",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [
+                    {"name": "marca", "expression": "`marca`"},
+                    {"name": "measure(Receita)", "expression": "MEASURE(`Receita`)"}
+                  ],
+                  "disaggregated": false,
+                  "orders": [{"direction": "DESC", "expression": "SUM(`receita`)"}]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fields": [
+                    {
+                      "fieldName": "measure(Receita)",
+                      "displayName": "Receita",
+                      "format": {"type": "number-currency", "currencyCode": "BRL", "abbreviation": "compact"}
+                    }
+                  ],
+                  "scale": {"type": "quantitative", "domainMin": 0}
+                },
+                "y": {"fieldName": "marca", "displayName": "Marca", "scale": {"type": "categorical"}}
+              },
+              "frame": {"showTitle": true, "title": "Top 10 Marcas por Receita"}
+            }
+          },
+          "position": {"x": 0, "y": 13, "width": 6, "height": 6}
+        },
+        {
+          "widget": {
+            "name": "margem-categoria",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [
+                    {"name": "categoria", "expression": "`categoria`"},
+                    {
+                      "name": "measure(Margem Percentual)",
+                      "expression": "MEASURE(`Margem Percentual`)"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "SUM(`margem`) / NULLIF(SUM(`receita`), 0)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fields": [
+                    {
+                      "fieldName": "measure(Margem Percentual)",
+                      "displayName": "Margem %",
+                      "format": {"type": "number-percent", "decimalPlaces": {"type": "max", "places": 1}}
+                    }
+                  ],
+                  "scale": {"type": "quantitative", "domainMin": 0}
+                },
+                "y": {
+                  "fieldName": "categoria",
+                  "displayName": "Categoria",
+                  "scale": {"type": "categorical"}
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Margem Percentual por Categoria",
+                "showDescription": true,
+                "description": "Ordenação crescente evidencia categorias de alto volume e menor rentabilidade."
+              }
+            }
+          },
+          "position": {"x": 6, "y": 13, "width": 6, "height": 6}
+        },
+        {
+          "widget": {
+            "name": "receita-canal",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [
+                    {"name": "canal", "expression": "`canal`"},
+                    {"name": "measure(Receita)", "expression": "MEASURE(`Receita`)"}
+                  ],
+                  "disaggregated": false,
+                  "orders": [{"direction": "DESC", "expression": "SUM(`receita`)"}]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "canal", "displayName": "Canal", "scale": {"type": "categorical"}},
+                "y": {
+                  "fieldName": "measure(Receita)",
+                  "displayName": "Receita",
+                  "scale": {"type": "quantitative", "domainMin": 0},
+                  "format": {"type": "number-currency", "currencyCode": "BRL", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"showTitle": true, "title": "Receita por Canal"}
+            }
+          },
+          "position": {"x": 0, "y": 19, "width": 12, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "top-clientes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_vendas",
+                  "fields": [
+                    {"name": "razao_social", "expression": "`razao_social`"},
+                    {"name": "segmento", "expression": "`segmento`"},
+                    {"name": "cidade", "expression": "`cidade`"},
+                    {"name": "measure(Receita)", "expression": "MEASURE(`Receita`)"}
+                  ],
+                  "filters": [{"expression": "`ranking_cliente` <= 20"}],
+                  "disaggregated": false,
+                  "orders": [{"direction": "DESC", "expression": "SUM(`receita`)"}]
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "razao_social", "displayName": "Cliente"},
+                  {"fieldName": "segmento", "displayName": "Segmento"},
+                  {"fieldName": "cidade", "displayName": "Cidade"},
+                  {
+                    "fieldName": "measure(Receita)",
+                    "displayName": "Receita",
+                    "format": {
+                      "type": "number-currency",
+                      "currencyCode": "BRL",
+                      "abbreviation": "compact",
+                      "decimalPlaces": {"type": "max", "places": 2}
+                    }
+                  }
+                ]
+              },
+              "frame": {"showTitle": true, "title": "Top 20 Clientes por Receita"}
+            }
+          },
+          "position": {"x": 0, "y": 24, "width": 12, "height": 8}
+        }
+      ]
+    },
+    {
+      "name": "fila-da-semana",
+      "displayName": "Fila da semana",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {
+          "widget": {
+            "name": "titulo-fila",
+            "multilineTextboxSpec": {
+              "lines": ["# Fila da semana — prioridade comercial"]
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "subtitulo-fila",
+            "multilineTextboxSpec": {
+              "lines": ["Selecione o vendedor e siga a ordem sugerida. Motivo e produto recomendado usam comportamento histórico, propensão e estoque recente."]
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "filtro-vendedor-fila",
+            "queries": [
+              {
+                "name": "ds_fila_vendedor",
+                "query": {
+                  "datasetName": "ds_fila",
+                  "fields": [{"name": "vendedor", "expression": "`vendedor`"}],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {"fieldName": "vendedor", "displayName": "Vendedor", "queryName": "ds_fila_vendedor"}
+                ]
+              },
+              "frame": {"showTitle": true, "title": "Vendedor"}
+            }
+          },
+          "position": {"x": 0, "y": 2, "width": 4, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "tabela-fila-semanal",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_fila",
+                  "fields": [
+                    {"name": "ordem", "expression": "`ordem`"},
+                    {"name": "razao_social", "expression": "`razao_social`"},
+                    {"name": "cidade", "expression": "`cidade`"},
+                    {"name": "score", "expression": "`score`"},
+                    {"name": "faixa", "expression": "`faixa`"},
+                    {"name": "motivo", "expression": "`motivo`"},
+                    {"name": "sugestao", "expression": "`sugestao`"}
+                  ],
+                  "disaggregated": true,
+                  "orders": [{"direction": "ASC", "expression": "`ordem`"}]
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "ordem", "displayName": "Ordem"},
+                  {"fieldName": "razao_social", "displayName": "Cliente"},
+                  {"fieldName": "cidade", "displayName": "Cidade"},
+                  {
+                    "fieldName": "score",
+                    "displayName": "Nota",
+                    "format": {
+                      "type": "number-percent",
+                      "decimalPlaces": {"type": "max", "places": 1}
+                    }
+                  },
+                  {"fieldName": "faixa", "displayName": "Faixa"},
+                  {"fieldName": "motivo", "displayName": "Motivo"},
+                  {"fieldName": "sugestao", "displayName": "Sugestão"}
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Contatos priorizados",
+                "showDescription": true,
+                "description": "A ordem reinicia em 1 para cada vendedor."
+              }
+            }
+          },
+          "position": {"x": 0, "y": 4, "width": 12, "height": 12}
+        }
+      ]
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {"light": "#F7F5F2", "dark": "#17131B"},
+      "widgetBackgroundColor": {"light": "#FFFFFF", "dark": "#241D29"},
+      "widgetBorderColor": {"light": "#FFFFFF", "dark": "#241D29"},
+      "fontColor": {"light": "#2D2230", "dark": "#F5EDF5"},
+      "selectionColor": {"light": "#7A284C", "dark": "#F2B8C6"},
+      "visualizationColors": [
+        "#7A284C",
+        "#B76E79",
+        "#D4A017",
+        "#275D5B",
+        "#5C4B8A",
+        "#E07A5F",
+        "#3C6997"
+      ],
+      "widgetHeaderAlignment": "LEFT"
+    }
+  }
+}

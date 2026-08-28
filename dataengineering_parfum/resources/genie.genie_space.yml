@@ -1,0 +1,10 @@
+resources:
+  genie_spaces:
+    comercial_genie:
+      title: Rota Perfume - Genie Comercial
+      description: >-
+        Assistente comercial da distribuidora B2B Rota Perfume, com métricas Gold governadas,
+        propensão de compra e fila semanal priorizada.
+        Bootstrap ${resources.job_runs.preparar_views_genie.id}.
+      file_path: comercial.geniespace.json
+      warehouse_id: ${var.warehouse_id}
