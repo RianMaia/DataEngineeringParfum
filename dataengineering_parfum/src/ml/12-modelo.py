@@ -61,7 +61,7 @@ nome_modelo = f"{catalog}.gold.propensao_compra"
 # COMMAND ----------
 
 # Baselines no holdout, calculados antes do treinamento do modelo.
-treino_pdf = spark.table(tabela_features_treino).toPandas()
+treino_pdf = spark.table(tabela_features_treino).orderBy("cliente_id").toPandas().reset_index(drop=True)
 X = treino_pdf[FEATURES]
 y = treino_pdf["comprou_em_7d"].astype("int32")
 
@@ -117,7 +117,7 @@ score_oof = cross_val_predict(
     method="predict_proba",
 )[:, 1]
 
-indices_top200 = np.argsort(-score_oof)[:200]
+indices_top200 = np.lexsort((treino_pdf["cliente_id"].to_numpy(), -score_oof))[:200]
 acertos_top200 = int(y.iloc[indices_top200].sum())
 taxa_base = float(y.mean())
 taxa_top200 = acertos_top200 / 200
@@ -217,7 +217,7 @@ print(f"Modelo registrado: {nome_modelo}, versão {versao_modelo}, alias @prod, 
 # Pontuação em pandas, usando exatamente a ordem de features gravada no modelo.
 modelo_prod = mlflow.sklearn.load_model(f"models:/{nome_modelo}@prod")
 features_modelo = list(modelo_prod.feature_names_in_)
-clientes_pdf = spark.table(tabela_features_cliente).toPandas()
+clientes_pdf = spark.table(tabela_features_cliente).orderBy("cliente_id").toPandas().reset_index(drop=True)
 scores_clientes = modelo_prod.predict_proba(clientes_pdf[features_modelo])[:, 1]
 
 score_pdf = pd.DataFrame(
@@ -228,7 +228,7 @@ score_pdf = pd.DataFrame(
         "versao_modelo": np.int32(versao_modelo),
     }
 )
-janela_score = Window.orderBy(F.col("score").asc())
+janela_score = Window.orderBy(F.col("score").desc(), F.col("cliente_id").asc())
 score_propensao = (
     spark.createDataFrame(score_pdf)
     .withColumn("cliente_id", F.col("cliente_id").cast("int"))
@@ -238,10 +238,10 @@ score_propensao = (
     .withColumn("quartil", F.ntile(4).over(janela_score))
     .withColumn(
         "faixa",
-        F.when(F.col("quartil") == 1, "Fria")
-        .when(F.col("quartil") == 2, "Morna")
-        .when(F.col("quartil") == 3, "Quente")
-        .otherwise("Muito quente"),
+        F.when(F.col("quartil") == 1, "Muito quente")
+        .when(F.col("quartil") == 2, "Quente")
+        .when(F.col("quartil") == 3, "Morna")
+        .otherwise("Fria"),
     )
     .select("cliente_id", "score", "faixa", "_referencia", "versao_modelo")
 )
@@ -297,20 +297,21 @@ spark.sql(
 
 holdout_pdf = pd.DataFrame(
     {
+        "cliente_id": treino_pdf.loc[y_holdout.index, "cliente_id"].to_numpy(dtype="int32"),
         "score": score_holdout.astype("float64"),
         "comprou": y_holdout.to_numpy(dtype="int32"),
     }
 )
-janela_holdout = Window.orderBy(F.col("score").asc())
+janela_holdout = Window.orderBy(F.col("score").desc(), F.col("cliente_id").asc())
 calibragem_holdout = (
     spark.createDataFrame(holdout_pdf)
     .withColumn("quartil", F.ntile(4).over(janela_holdout))
     .withColumn(
         "faixa",
-        F.when(F.col("quartil") == 1, "Fria")
-        .when(F.col("quartil") == 2, "Morna")
-        .when(F.col("quartil") == 3, "Quente")
-        .otherwise("Muito quente"),
+        F.when(F.col("quartil") == 1, "Muito quente")
+        .when(F.col("quartil") == 2, "Quente")
+        .when(F.col("quartil") == 3, "Morna")
+        .otherwise("Fria"),
     )
     .groupBy("faixa", "quartil")
     .agg(

@@ -120,7 +120,7 @@ elegiveis AS (
 top_200 AS (
   SELECT *
   FROM elegiveis
-  ORDER BY score DESC, cliente_id
+  ORDER BY score DESC, cliente_id ASC
   LIMIT 200
 ),
 fila AS (
@@ -128,7 +128,7 @@ fila AS (
     vendedor,
     ROW_NUMBER() OVER (
       PARTITION BY vendedor
-      ORDER BY score DESC, cliente_id
+      ORDER BY score DESC, cliente_id ASC
     ) AS ordem,
     cliente_id,
     razao_social,
