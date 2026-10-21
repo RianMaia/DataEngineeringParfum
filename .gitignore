@@ -1,0 +1,15 @@
+# Segredos: nunca devem ir para o GitHub
+.env
+.env.*
+
+# Ambiente virtual do Python (recriável com uv)
+.venv/
+
+# Caches gerados automaticamente
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Lixo do macOS
+.DS_Store
