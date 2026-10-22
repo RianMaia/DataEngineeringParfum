@@ -1,6 +1,7 @@
 # Segredos: nunca devem ir para o GitHub
 .env
 .env.*
+!.env.example
 
 # Ambiente virtual do Python (recriável com uv)
 .venv/

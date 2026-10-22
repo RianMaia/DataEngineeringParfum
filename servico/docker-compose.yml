@@ -1,0 +1,30 @@
+# Banco PostgreSQL local do serviço (somente desenvolvimento).
+#   Subir:                       docker compose up -d
+#   Derrubar, mantendo os dados: docker compose down
+#   Apagar os dados e recriar:   docker compose down -v
+# O esquema (sql/001_esquema.sql) só é aplicado quando o volume está vazio, ou seja, na primeira subida.
+name: rotaperfume-servico
+
+services:
+  banco:
+    image: postgres:16.15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-parfum}
+      POSTGRES_DB: ${POSTGRES_DB:-parfum}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no arquivo servico/.env}
+    ports:
+      # Só a própria máquina acessa o banco; nada fica exposto na rede.
+      # A porta 5432 do Mac já é usada por outro projeto, então este banco usa a 5433.
+      - "127.0.0.1:${POSTGRES_PORTA:-5433}:5432"
+    volumes:
+      - dados_banco:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # -h 127.0.0.1 força TCP: durante a inicialização o servidor temporário só aceita conexão por socket.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  dados_banco:
