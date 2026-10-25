@@ -21,6 +21,7 @@ dev = [
     "pytest",  # executa os testes automatizados
     "httpx2",  # cliente HTTP usado pelo TestClient do FastAPI para chamar a API nos testes
     "ruff",    # verifica estilo e erros comuns, e formata o código
+    "pytest-cov>=7.1.0",
 ]
 
 [tool.uv]
@@ -33,3 +34,11 @@ pythonpath = ["."]  # permite "from app.main import app" nos testes
 
 [tool.ruff]
 line-length = 120
+
+[tool.coverage.run]
+source = ["app", "carga"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 95  # o CI recusa se a cobertura cair abaixo disto
+show_missing = true
