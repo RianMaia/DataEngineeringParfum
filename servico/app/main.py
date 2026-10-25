@@ -6,8 +6,10 @@ from typing import Annotated
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
 from psycopg import Connection, OperationalError
+from starlette.exceptions import HTTPException as ErroHTTP
 
 from app.banco import criar_pool, obter_conexao
+from app.fila import roteador as roteador_fila
 
 
 @asynccontextmanager
@@ -27,12 +29,19 @@ app = FastAPI(
     version="0.1.0",
     lifespan=ciclo_de_vida,
 )
+app.include_router(roteador_fila)
 
 
 @app.exception_handler(OperationalError)
 def banco_indisponivel(request: Request, erro: OperationalError) -> JSONResponse:
     """Qualquer falha de conexão vira 503 sem detalhes: nada de host, usuário ou senha na resposta."""
     return JSONResponse(status_code=503, content={"detalhe": "banco de dados indisponível"})
+
+
+@app.exception_handler(ErroHTTP)
+def erro_http(request: Request, erro: ErroHTTP) -> JSONResponse:
+    """Erros esperados (404, 503...) saem todos no mesmo formato: {"detalhe": "..."}."""
+    return JSONResponse(status_code=erro.status_code, content={"detalhe": erro.detail})
 
 
 @app.get("/saude")
