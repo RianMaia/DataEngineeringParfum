@@ -9,6 +9,11 @@ dependencies = [
 ]
 
 [dependency-groups]
+carga = [
+    "databricks-sdk>=0.147.0",
+    "databricks-sql-connector>=4.6.0",
+    "psycopg[binary]>=3.3.6",
+]
 # Só para desenvolvimento e testes. Não entram na imagem Docker de produção.
 dev = [
     "pytest",  # executa os testes automatizados
