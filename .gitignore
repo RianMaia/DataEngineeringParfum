@@ -14,3 +14,6 @@ __pycache__/
 
 # Lixo do macOS
 .DS_Store
+
+.coverage
+htmlcov/
