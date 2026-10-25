@@ -5,6 +5,8 @@ description = "Camada de serviço (FastAPI + PostgreSQL) do DataEngineeringParfu
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi",  # framework da API: rotas, validação de entrada e documentação automática (/docs)
+    "psycopg-pool>=3.3.3",
+    "psycopg[binary]>=3.3.6",
     "uvicorn",  # servidor que executa a aplicação FastAPI
 ]
 
