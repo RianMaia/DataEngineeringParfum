@@ -2,6 +2,7 @@
 #   Subir:                       docker compose up -d
 #   Derrubar, mantendo os dados: docker compose down
 #   Apagar os dados e recriar:   docker compose down -v
+#   Subir também a API:          docker compose --profile api up -d --build api
 # O esquema (sql/001_esquema.sql) só é aplicado quando o volume está vazio, ou seja, na primeira subida.
 name: rotaperfume-servico
 
@@ -25,6 +26,23 @@ services:
       interval: 5s
       timeout: 3s
       retries: 12
+
+  api:
+    # Só sobe com o perfil "api", então "docker compose up -d" continua subindo apenas o banco.
+    profiles: ["api"]
+    build: .
+    depends_on:
+      banco:
+        condition: service_healthy
+    environment:
+      # Dentro da rede do Compose o banco se chama "banco" e escuta na 5432 (a 5433 é só a porta do Mac).
+      POSTGRES_HOST: banco
+      POSTGRES_PORTA: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-parfum}
+      POSTGRES_API_USUARIO: ${POSTGRES_API_USUARIO:-parfum_api}
+      POSTGRES_API_SENHA: ${POSTGRES_API_SENHA:-}
+    ports:
+      - "127.0.0.1:${API_PORTA:-8000}:8000"
 
 volumes:
   dados_banco:

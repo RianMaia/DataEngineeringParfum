@@ -1,0 +1,13 @@
+# O que NÃO vai para dentro da imagem (nem para o contexto de build). O .env tem a senha: nunca entra.
+.env
+.venv
+.git
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.coverage
+tests
+carga
+sql
+docker-compose.yml
+Dockerfile
