@@ -9,7 +9,10 @@ from psycopg import Connection, OperationalError
 from starlette.exceptions import HTTPException as ErroHTTP
 
 from app.banco import criar_pool, obter_conexao
+from app.contexto import roteador as roteador_contexto
+from app.disponibilidade import roteador as roteador_disponibilidade
 from app.fila import roteador as roteador_fila
+from app.sugestoes import roteador as roteador_sugestoes
 
 
 @asynccontextmanager
@@ -30,6 +33,9 @@ app = FastAPI(
     lifespan=ciclo_de_vida,
 )
 app.include_router(roteador_fila)
+app.include_router(roteador_contexto)
+app.include_router(roteador_sugestoes)
+app.include_router(roteador_disponibilidade)
 
 
 @app.exception_handler(OperationalError)
