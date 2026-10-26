@@ -68,6 +68,9 @@ O segundo comando remove só o contêiner da API. Nunca use `docker compose down
   Gold muda com a data: rode a carga de novo para a API refletir o dia.
 - O histórico de execuções do job tem lacunas (por exemplo, nenhuma execução entre 16/09 e 21/10). Nenhuma execução
   listada falhou, e a causa das lacunas não foi confirmada: seriam necessários os logs de auditoria do workspace.
+- No Gold, a fila e a função `fila_do_vendedor` usam o nome do vendedor, e 2 pares de vendedores têm o mesmo nome (ids 31 e
+  37, e 34 e 36). A API usa o `vendedor_id` e não é afetada, mas o dashboard e as consultas por nome misturam as carteiras
+  de 34 e 36.
 - Os dados de origem são, com quase certeza, sintéticos (veja "Sobre os dados" no [README](../README.md)); é uma
   conclusão por evidência, não uma confirmação da origem.
 - Muitos produtos têm snapshot de estoque anterior ao global (a API sinaliza com `defasado`).

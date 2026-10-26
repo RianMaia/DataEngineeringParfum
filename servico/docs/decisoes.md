@@ -104,10 +104,32 @@ conferida no PyPI e no `uv.lock`. Ele só existe no grupo de desenvolvimento, nu
 
 Os scores que a API serve vêm do modelo `gold.propensao_compra`, registrado no Unity Catalog (alias `@prod`) e treinado
 com `HistGradientBoostingClassifier`. Valores lidos no run do MLflow da versão em produção (verificados em 25/10/2026):
-AUC de 0,874 no holdout de 25%; entre os 200 primeiros clientes do ranking (validação cruzada, 5 partes), 87 compraram,
-contra uma taxa base de 10,1%, ou seja, um ganho (lift) de 4,30 vezes. Os baselines, medidos no mesmo holdout, ficaram
+AUC de 0,874 no holdout de 25%; entre os 200 clientes mais bem pontuados do conjunto de treino (2.815 clientes, com
+previsões de validação cruzada em 5 partes), 87 compraram, contra uma taxa base de 10,1%, ou seja, um ganho (lift) de 4,30
+vezes. Essa é uma estimativa feita no treino: a fila real usa um terceiro modelo, treinado com todos os dados e aplicado a
+outra data, só a clientes elegíveis, e o resultado dela ainda não foi medido. Os baselines, medidos no mesmo holdout, ficaram
 abaixo: "quem está atrasado" 0,772, "quem compra mais" 0,610 e "quem comprou há pouco" 0,358. Este último, abaixo de 0,5,
 ordena pior do que o acaso: neste conjunto, comprar há pouco indica quem **não** vai comprar logo (inferência a partir da
 métrica, não uma medição direta). Cautelas: os dados são sintéticos, então os números mostram que o método funciona, e
 não quanto renderia numa empresa real; e o treino é determinístico (`random_state=42`), compatível com a versão de
 25/10 ter repetido as métricas que já constavam no README do projeto.
+
+## 17. O que a revisão independente do pipeline encontrou
+
+A revisão do pipeline do Databricks apontou 23 itens. Cada um foi conferido no código e, quando possível, medido nos CSV
+(25/10/2026). **Nenhum foi corrigido ainda**: ficam como pendências do pipeline.
+
+- **O Gold depende do dia.** `vigente`, `ativo` e `dias_sem_comprar` usam `CURRENT_DATE()`, enquanto o score usa datas fixas
+  (01/08 no treino e 31/08 na fila). O job roda todo dia, então a mesma entrada pode dar saídas diferentes em dias diferentes.
+- **Vazamento de dados no desenho das features.** As oportunidades são cortadas pela data de abertura, mas contadas pelo
+  resultado final. Dos 5.617 abertos antes do corte de 01/08, 104 (1,9%) fecharam depois. O efeito medido é pequeno: dos 101
+  clientes com oportunidade ganha fechada depois do corte, 6,9% compraram na janela do alvo, abaixo da taxa base de 8,8%.
+- **O modelo é registrado e o alias `@prod` é movido a cada execução**, sem comparar com a versão anterior (23 versões em
+  25/10), e as métricas são acrescentadas a cada vez.
+- **O job não tem notificação de falha, tempo máximo, tentativas nem limite de execuções simultâneas.**
+- **A fila e a função `fila_do_vendedor` usam o nome do vendedor.** Há 2 pares com o mesmo nome (ids 31 e 37, em que o 37 está
+  desligado, e 34 e 36, ambos ativos). A API usa o `vendedor_id` da carteira e não é afetada.
+- **Os testes têm valores fixos** (receita, 2.815 e 2.816 clientes, taxa base de 10,12%): o job quebra se os dados mudarem.
+- **Riscos que existem no desenho mas não aparecem nestes dados:** a deduplicação por CNPJ de 14 dígitos funcionou (40 pares
+  idênticos, 24 com formatação diferente, e nenhuma linha de carteira, oportunidade, visita ou pedido aponta para um id
+  descartado); não há datas inválidas; só 1 pedido é composto apenas de devoluções.
