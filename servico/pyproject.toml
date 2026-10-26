@@ -1,0 +1,44 @@
+[project]
+name = "rotaperfume-servico"
+version = "0.1.0"
+description = "Camada de serviço (FastAPI + PostgreSQL) do DataEngineeringParfum"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi",  # framework da API: rotas, validação de entrada e documentação automática (/docs)
+    "psycopg-pool>=3.3.3",
+    "psycopg[binary]>=3.3.6",
+    "uvicorn",  # servidor que executa a aplicação FastAPI
+]
+
+[dependency-groups]
+carga = [
+    "databricks-sdk>=0.147.0",
+    "databricks-sql-connector>=4.6.0",
+    "psycopg[binary]>=3.3.6",
+]
+# Só para desenvolvimento e testes. Não entram na imagem Docker de produção.
+dev = [
+    "pytest",  # executa os testes automatizados
+    "httpx2",  # cliente HTTP usado pelo TestClient do FastAPI para chamar a API nos testes
+    "ruff",    # verifica estilo e erros comuns, e formata o código
+    "pytest-cov>=7.1.0",
+]
+
+[tool.uv]
+package = false                        # é uma aplicação, não uma biblioteca instalável
+exclude-newer = "2026-10-07T00:00:00Z" # ignora pacotes publicados nos últimos 14 dias (até 21/10/2026)
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]  # permite "from app.main import app" nos testes
+
+[tool.ruff]
+line-length = 120
+
+[tool.coverage.run]
+source = ["app", "carga"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 95  # o CI recusa se a cobertura cair abaixo disto
+show_missing = true

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: servico
+    services:
+      postgres:
+        image: postgres:16.15
+        env:
+          POSTGRES_USER: parfum
+          POSTGRES_PASSWORD: senha_so_do_ci # banco descartável do CI: não é um segredo
+          POSTGRES_DB: parfum
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U parfum -d parfum"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: parfum
+      PGPASSWORD: senha_so_do_ci
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.7"
+      - name: Instalar as dependências exatamente como no uv.lock (falha se o lock estiver desatualizado)
+        run: uv sync --locked --group carga
+      - name: Estilo (ruff)
+        run: |
+          uv run --locked --group carga ruff check .
+          uv run --locked --group carga ruff format --check .
+      - name: Testes com piso de cobertura
+        run: uv run --locked --group carga pytest --cov
+
+  imagem:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Construir a imagem da API
+        run: docker build -t rotaperfume-api:ci servico
