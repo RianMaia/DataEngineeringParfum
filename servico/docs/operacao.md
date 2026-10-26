@@ -63,8 +63,11 @@ O segundo comando remove só o contêiner da API. Nunca use `docker compose down
 
 ## Limitações conhecidas
 
-- Os dados são um **retrato**: o último run do pipeline foi em 15/09 e a causa da parada não foi investigada. O job não
-  deve ser rodado de novo sem entender que `vigente` e `ativo` dependem de `CURRENT_DATE()`.
+- Os dados da API são um **retrato** da última carga, e a carga não é agendada. O job do pipeline roda todo dia às 06:00
+  (horário de Brasília; verificado em 25/10/2026) e, como `vigente` e `ativo` dependem de `CURRENT_DATE()`, o conteúdo do
+  Gold muda com a data: rode a carga de novo para a API refletir o dia.
+- O histórico de execuções do job tem lacunas (por exemplo, nenhuma execução entre 16/09 e 21/10). Nenhuma execução
+  listada falhou, e a causa das lacunas não foi confirmada: seriam necessários os logs de auditoria do workspace.
 - Os dados de origem são, com quase certeza, sintéticos (veja "Sobre os dados" no [README](../README.md)); é uma
   conclusão por evidência, não uma confirmação da origem.
 - Muitos produtos têm snapshot de estoque anterior ao global (a API sinaliza com `defasado`).

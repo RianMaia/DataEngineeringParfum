@@ -99,3 +99,15 @@ os dados antigos).
 O `TestClient` do FastAPI precisa de um cliente HTTP, e hoje ele é o `httpx2`: o sucessor do `httpx`, do mesmo autor (Tom
 Christie), publicado em `github.com/pydantic/httpx2` e exigido pelo próprio `starlette` 1.7.0 (extra `full`). A origem foi
 conferida no PyPI e no `uv.lock`. Ele só existe no grupo de desenvolvimento, nunca na imagem Docker.
+
+## 16. O modelo de propensão, que alimenta os scores
+
+Os scores que a API serve vêm do modelo `gold.propensao_compra`, registrado no Unity Catalog (alias `@prod`) e treinado
+com `HistGradientBoostingClassifier`. Valores lidos no run do MLflow da versão em produção (verificados em 25/10/2026):
+AUC de 0,874 no holdout de 25%; entre os 200 primeiros clientes do ranking (validação cruzada, 5 partes), 87 compraram,
+contra uma taxa base de 10,1%, ou seja, um ganho (lift) de 4,30 vezes. Os baselines, medidos no mesmo holdout, ficaram
+abaixo: "quem está atrasado" 0,772, "quem compra mais" 0,610 e "quem comprou há pouco" 0,358. Este último, abaixo de 0,5,
+ordena pior do que o acaso: neste conjunto, comprar há pouco indica quem **não** vai comprar logo (inferência a partir da
+métrica, não uma medição direta). Cautelas: os dados são sintéticos, então os números mostram que o método funciona, e
+não quanto renderia numa empresa real; e o treino é determinístico (`random_state=42`), compatível com a versão de
+25/10 ter repetido as métricas que já constavam no README do projeto.
