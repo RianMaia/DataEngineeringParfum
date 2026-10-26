@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path
 from psycopg import Connection
 from pydantic import BaseModel
 
-from app.banco import ler_meta
+from app.exigencias import exigir_meta
 from app.leitura import obter_leitura_consistente
 from app.modelos import Meta
 
@@ -70,9 +70,7 @@ def fila_do_vendedor(
     vendedor_id: Annotated[int, Path(ge=1, description="Identificador do vendedor")],
     conexao: Annotated[Connection, Depends(obter_leitura_consistente)],
 ):
-    meta = ler_meta(conexao)
-    if meta is None:
-        raise HTTPException(status_code=503, detail="nenhuma carga concluída")
+    meta = exigir_meta(conexao)
     vendedor = conexao.execute(SQL_VENDEDOR, (vendedor_id,)).fetchone()
     if vendedor is None:
         raise HTTPException(status_code=404, detail="vendedor não encontrado")

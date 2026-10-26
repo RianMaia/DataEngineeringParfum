@@ -45,8 +45,10 @@ abrir janelas), e um cronômetro de 30 minutos encerra a carga se algo travar.
 
 ## 7. A API só lê, em duas camadas
 
-O papel `parfum_api` tem apenas `SELECT` nas 7 tabelas (testado: `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `CREATE` e
-`DROP` são negados), e as sessões da API ainda abrem em modo somente leitura, mesmo que o papel mudasse.
+A garantia de verdade é o papel `parfum_api`, que tem apenas `SELECT` nas 7 tabelas (testado contra o `002_perfis.sql`:
+`INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `CREATE` e `DROP` são negados, e o papel consegue executar todas as consultas da
+API). A segunda camada, a sessão aberta em modo somente leitura, protege contra um erro de código da própria API, mas não
+contra quem tiver a senha: quem se conecta pode desligá-la, e por isso ela não é a garantia.
 
 ## 8. Cada requisição vê uma única fotografia do banco
 
@@ -75,3 +77,25 @@ carregador achou 4 defeitos reais, todos reproduzidos por teste e corrigidos.
 
 Só as dependências de produção (sem `pytest`, `ruff`, Databricks nem `pandas`, conferido dentro da imagem), usuário sem
 privilégios, e o `.env` nunca entra na imagem (`.dockerignore`).
+
+## 13. Sem autenticação, por enquanto
+
+A API não pede senha nem chave, e a decisão é consciente: ela só escuta em `127.0.0.1` (o Compose não a expõe na rede) e os
+dados de origem são, com quase certeza, sintéticos (os CNPJs do CSV têm dígitos verificadores inválidos). Antes de expô-la
+fora desta máquina ela precisa de autenticação, HTTPS e limite de requisições, e a lista de razões sociais e nomes de
+vendedores que ela devolve precisa ser reavaliada.
+
+## 14. Conexões e limites de tempo
+
+O pool testa cada conexão antes de emprestá-la: se o PostgreSQL reiniciar, a próxima requisição recebe uma conexão nova em
+vez de um erro. Cada sessão da API tem limites: uma consulta é cancelada após 10 s, a espera por um lock de outra sessão
+desiste após 3 s e uma transação parada por 30 s é encerrada. **Por quê:** sem eles, um lock esquecido (um `TRUNCATE` ou
+`ALTER` manual) prenderia as 5 conexões do pool e toda a API passaria a responder `503`. Testado: derrubar as conexões,
+segurar um lock forte e abrir uma transação de carga sem `COMMIT` (esta **não** bloqueia a leitura: quem lê continua vendo
+os dados antigos).
+
+## 15. A dependência de teste `httpx2`
+
+O `TestClient` do FastAPI precisa de um cliente HTTP, e hoje ele é o `httpx2`: o sucessor do `httpx`, do mesmo autor (Tom
+Christie), publicado em `github.com/pydantic/httpx2` e exigido pelo próprio `starlette` 1.7.0 (extra `full`). A origem foi
+conferida no PyPI e no `uv.lock`. Ele só existe no grupo de desenvolvimento, nunca na imagem Docker.

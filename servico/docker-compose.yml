@@ -43,6 +43,14 @@ services:
       POSTGRES_API_SENHA: ${POSTGRES_API_SENHA:-}
     ports:
       - "127.0.0.1:${API_PORTA:-8000}:8000"
+    # Endurecimento: sistema de arquivos só de leitura, sem privilégios extras do Linux, sem poder ganhar novos.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   dados_banco:

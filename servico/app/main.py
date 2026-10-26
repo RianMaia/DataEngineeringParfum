@@ -47,7 +47,13 @@ def banco_indisponivel(request: Request, erro: OperationalError) -> JSONResponse
 @app.exception_handler(ErroHTTP)
 def erro_http(request: Request, erro: ErroHTTP) -> JSONResponse:
     """Erros esperados (404, 503...) saem todos no mesmo formato: {"detalhe": "..."}."""
-    return JSONResponse(status_code=erro.status_code, content={"detalhe": erro.detail})
+    return JSONResponse(status_code=erro.status_code, content={"detalhe": erro.detail}, headers=erro.headers)
+
+
+@app.exception_handler(Exception)
+def erro_interno(request: Request, erro: Exception) -> JSONResponse:
+    """Erro inesperado vira 500 no mesmo formato, sem o texto do erro na resposta (o detalhe fica só nos logs)."""
+    return JSONResponse(status_code=500, content={"detalhe": "erro interno"})
 
 
 @app.get("/saude")
@@ -58,6 +64,6 @@ def saude() -> dict[str, str]:
 
 @app.get("/pronto")
 def pronto(conexao: Annotated[Connection, Depends(obter_conexao)]) -> dict[str, str]:
-    """Verifica se o banco responde (para o healthcheck do Docker, mais adiante)."""
+    """Verifica se o banco responde (o HEALTHCHECK da imagem Docker consulta esta rota)."""
     conexao.execute("SELECT 1")
     return {"status": "ok"}

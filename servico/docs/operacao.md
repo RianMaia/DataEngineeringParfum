@@ -47,8 +47,10 @@ ela começa por `etapa=` e `tipo=`.
 
 ## Senhas
 
-Ficam só em `servico/.env` (fora do Git). Nunca as imprima. Para trocar a senha da API, repita o passo 3 da primeira vez
-no [README](../README.md) (o `ALTER ROLE` muda a senha; atualize também a linha `POSTGRES_API_SENHA` do `.env`).
+Ficam só em `servico/.env` (fora do Git). Nunca as imprima. Para trocar a senha da API, apague do `.env` (num editor) as
+duas linhas `POSTGRES_API_USUARIO` e `POSTGRES_API_SENHA` e repita o passo 3 da primeira vez no [README](../README.md);
+sem apagar antes, o passo acrescentaria linhas repetidas. Se o `ALTER ROLE` falhar, o PostgreSQL pode registrar o texto do
+comando, com a senha, no próprio log: nesse caso defina uma senha nova.
 
 ## A API em contêiner
 
@@ -68,4 +70,6 @@ O segundo comando remove só o contêiner da API. Nunca use `docker compose down
 - A API não tem autenticação e só escuta em `127.0.0.1`: não a exponha na rede assim.
 - O perfil e o identificador do warehouse do Databricks estão fixos em `carga/extracao.py`.
 - O `422` usa o formato `detail` do FastAPI, diferente do `detalhe` dos demais erros.
+- `sem_ruptura` ainda inclui produtos descontinuados e trata saldo negativo como estoque confirmado: é uma regra de
+  negócio em aberto.
 - O passo a passo da "primeira vez" (volume novo) não foi executado de ponta a ponta: o banco atual foi montado por etapas.
