@@ -53,6 +53,10 @@ O Databricks Asset Bundle reúne schemas, volume, job, dashboard e Genie como re
 - Genie
 - Lakeview Dashboards
 - Git e GitHub
+- PostgreSQL
+- FastAPI
+- Docker
+- GitHub Actions
 
 ## Estrutura do repositório
 
@@ -62,6 +66,13 @@ DataEngineeringParfum/
 ├── dados/
 │   ├── crm/                         # 5 arquivos CSV do CRM
 │   └── erp/                         # 5 arquivos CSV do ERP
+├── dashboards/
+│   └── dataegineering-parfum.lvdash.json  # Dashboard final (cópia de segurança, fora do bundle)
+├── servico/                         # Camada de serviço: carga para PostgreSQL e API FastAPI
+│   ├── app/                         # API FastAPI somente leitura
+│   ├── carga/                       # Carregador Databricks para PostgreSQL
+│   ├── docs/                        # Decisões de projeto e guia de operação
+│   └── README.md
 └── dataengineering_parfum/
     ├── databricks.yml               # Bundle, variáveis e targets
     ├── resources/
@@ -217,6 +228,21 @@ O Lakeview Dashboard `Rota Perfume - Dashboard Comercial` possui duas páginas:
 O Genie Comercial é configurado como código e consulta 13 objetos governados da Gold, incluindo as seis views de negócio, dimensões, fato de vendas, score de propensão e fila semanal. Suas instruções definem glossário, sazonalidade, cálculos e fontes preferenciais, além de exemplos de perguntas e SQL validados.
 
 O dashboard final foi criado e publicado no Databricks com o assistente Genie, consolidando visualizações executivas e exploração dos dados em linguagem natural sobre os mesmos objetos governados.
+
+A definição desse dashboard está versionada em `dashboards/dataegineering-parfum.lvdash.json`, como cópia de segurança: ele vive só no workspace, fora do bundle, e lê o Gold ao vivo.
+
+## Camada de serviço
+
+A pasta `servico/` leva os resultados do Gold para fora do Databricks: um carregador copia as tabelas para um PostgreSQL
+local, e uma API FastAPI somente leitura entrega ao vendedor a fila da semana, o contexto de cada cliente, os produtos
+sugeridos e a disponibilidade em estoque. Tem Docker, integração contínua no GitHub Actions e testes contra um PostgreSQL
+de verdade.
+
+Fluxo: `Gold (Databricks) → carga → PostgreSQL → API FastAPI`.
+
+- Como montar e usar: [`servico/README.md`](servico/README.md).
+- Por que foi desenhada assim, com o que foi descartado: [`servico/docs/decisoes.md`](servico/docs/decisoes.md).
+- Operação e limitações conhecidas: [`servico/docs/operacao.md`](servico/docs/operacao.md).
 
 ## Como executar
 

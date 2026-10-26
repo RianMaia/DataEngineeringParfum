@@ -3,6 +3,8 @@
 import re
 from pathlib import Path
 
+import pytest
+
 from app.main import app
 
 RAIZ_SERVICO = Path(__file__).resolve().parents[2]
@@ -48,3 +50,20 @@ def test_os_comandos_citados_existem():
     assert "python -m carga.executar" in README and (RAIZ_SERVICO / "carga" / "executar.py").exists()
     assert (RAIZ_SERVICO / "sql" / "001_esquema.sql").exists() and (RAIZ_SERVICO / "sql" / "002_perfis.sql").exists()
     assert "carga/extracao.py" in DOCUMENTOS["docs/operacao.md"] and (RAIZ_SERVICO / "carga" / "extracao.py").exists()
+
+
+RAIZ_REPOSITORIO = RAIZ_SERVICO.parent
+README_DA_RAIZ = RAIZ_REPOSITORIO / "README.md"
+
+
+@pytest.mark.skipif(not README_DA_RAIZ.exists(), reason="o README da raiz não está neste checkout")
+def test_o_readme_da_raiz_aponta_para_a_camada_de_servico_e_para_os_dashboards():
+    texto = README_DA_RAIZ.read_text(encoding="utf-8")
+    for destino in (
+        "servico/README.md",
+        "servico/docs/decisoes.md",
+        "servico/docs/operacao.md",
+        "dashboards/dataegineering-parfum.lvdash.json",
+    ):
+        assert destino in texto, f"o README da raiz não cita {destino}"
+        assert (RAIZ_REPOSITORIO / destino).exists(), f"{destino} não existe"
