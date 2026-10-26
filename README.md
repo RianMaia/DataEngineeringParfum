@@ -255,6 +255,8 @@ databricks bundle deploy --target dev --profile <PROFILE>
 databricks bundle run rotaperfume_pipeline --target dev --profile <PROFILE>
 ```
 
+O bundle exige a variável `alerta_email`, o e-mail que recebe o aviso quando o job falha. Ela não tem valor padrão de propósito, porque o repositório é público: exporte `BUNDLE_VAR_alerta_email=seu@email` no seu terminal, ou passe `--var="alerta_email=seu@email"` em cada um dos comandos acima.
+
 Para executar isoladamente as tarefas de ML:
 
 ```bash

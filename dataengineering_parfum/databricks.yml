@@ -13,6 +13,11 @@ variables:
   warehouse_id:
     description: SQL warehouse used by administrative scripts.
     default: 107dd2f1b9c84d4d
+  alerta_email:
+    description: >-
+      E-mail que recebe o aviso quando o job falha. Sem valor padrao de proposito: o repositorio e publico e um
+      deploy sem esta variavel deve falhar, em vez de ficar sem aviso. Passe --var="alerta_email=..." ou exporte
+      BUNDLE_VAR_alerta_email.
 
 targets:
   dev:
