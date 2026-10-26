@@ -117,16 +117,21 @@ não quanto renderia numa empresa real; e o treino é determinístico (`random_s
 ## 17. O que a revisão independente do pipeline encontrou
 
 A revisão do pipeline do Databricks apontou 23 itens. Cada um foi conferido no código e, quando possível, medido nos CSV
-(25/10/2026). **Nenhum foi corrigido ainda**: ficam como pendências do pipeline.
+(25/10/2026). Um foi corrigido em 26/10/2026 (o aviso de falha e os limites do job, ver abaixo); os demais ficam como
+pendências do pipeline.
 
 - **O Gold depende do dia.** `vigente`, `ativo` e `dias_sem_comprar` usam `CURRENT_DATE()`, enquanto o score usa datas fixas
   (01/08 no treino e 31/08 na fila). O job roda todo dia, então a mesma entrada pode dar saídas diferentes em dias diferentes.
+  Em 26/10, uma carga nova deu as mesmas impressões digitais das seis tabelas da carga do dia anterior: o efeito não apareceu
+  em um dia, mas o risco continua.
 - **Vazamento de dados no desenho das features.** As oportunidades são cortadas pela data de abertura, mas contadas pelo
   resultado final. Dos 5.617 abertos antes do corte de 01/08, 104 (1,9%) fecharam depois. O efeito medido é pequeno: dos 101
   clientes com oportunidade ganha fechada depois do corte, 6,9% compraram na janela do alvo, abaixo da taxa base de 8,8%.
 - **O modelo é registrado e o alias `@prod` é movido a cada execução**, sem comparar com a versão anterior (23 versões em
   25/10), e as métricas são acrescentadas a cada vez.
-- **O job não tem notificação de falha, tempo máximo, tentativas nem limite de execuções simultâneas.**
+- **O job avisa por e-mail quando falha, tem limite de 1 hora e roda uma execução por vez** (corrigido em 26/10/2026).
+  O e-mail vem da variável `alerta_email` do bundle, que não tem valor padrão e nunca entra no repositório. O job continua
+  sem tentativas automáticas, e o aviso cobre falhas, não a ausência de execuções.
 - **A fila e a função `fila_do_vendedor` usam o nome do vendedor.** Há 2 pares com o mesmo nome (ids 31 e 37, em que o 37 está
   desligado, e 34 e 36, ambos ativos). A API usa o `vendedor_id` da carteira e não é afetada.
 - **Os testes têm valores fixos** (receita, 2.815 e 2.816 clientes, taxa base de 10,12%): o job quebra se os dados mudarem.
