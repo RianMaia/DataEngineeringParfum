@@ -9,6 +9,13 @@ resources:
         timezone_id: America/Sao_Paulo
         pause_status: UNPAUSED
 
+      # Uma execucao por vez, limite de 1 hora (os runs levam de 8 a 10 minutos) e aviso por e-mail quando falha.
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+      email_notifications:
+        on_failure:
+          - ${var.alerta_email}
+
       parameters:
         - name: catalog
           default: ${var.catalog}
