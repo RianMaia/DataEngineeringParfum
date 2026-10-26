@@ -65,7 +65,8 @@ O segundo comando remove só o contêiner da API. Nunca use `docker compose down
 
 - Os dados da API são um **retrato** da última carga, e a carga não é agendada. O job do pipeline roda todo dia às 06:00
   (horário de Brasília; verificado em 25/10/2026) e, como `vigente` e `ativo` dependem de `CURRENT_DATE()`, o conteúdo do
-  Gold muda com a data: rode a carga de novo para a API refletir o dia.
+  Gold pode mudar com a data (de 25 para 26/10 não mudou: as impressões digitais das seis tabelas foram iguais): rode a
+  carga de novo para a API refletir o dia.
 - O histórico de execuções do job tem lacunas (por exemplo, nenhuma execução entre 16/09 e 21/10). Nenhuma execução
   listada falhou, e a causa das lacunas não foi confirmada: seriam necessários os logs de auditoria do workspace.
 - No Gold, a fila e a função `fila_do_vendedor` usam o nome do vendedor, e 2 pares de vendedores têm o mesmo nome (ids 31 e
@@ -80,3 +81,7 @@ O segundo comando remove só o contêiner da API. Nunca use `docker compose down
 - `sem_ruptura` ainda inclui produtos descontinuados e trata saldo negativo como estoque confirmado: é uma regra de
   negócio em aberto.
 - O passo a passo da "primeira vez" (volume novo) não foi executado de ponta a ponta: o banco atual foi montado por etapas.
+- O alvo `dev` do bundle não é isolado: usa o mesmo catálogo do `prod` (fixo nos arquivos SQL), e o preset
+  `trigger_pause_status: PAUSED` não vale para o job, porque, segundo a documentação do Databricks, a configuração
+  explícita do recurso (`UNPAUSED`) prevalece sobre o preset. Todo `bundle deploy` também dispara a tarefa
+  `metricas_de_negocio`, que recria as 6 views do Gold.
