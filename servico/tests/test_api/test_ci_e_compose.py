@@ -38,3 +38,10 @@ def test_o_servico_api_do_compose_e_endurecido():
     assert re.search(r"cap_drop:\n\s+- ALL", bloco)
     assert "no-new-privileges:true" in bloco
     assert '"127.0.0.1:${API_PORTA:-8000}:8000"' in bloco
+
+
+@sem_ci
+def test_o_workflow_fixa_o_sistema_do_runner_em_vez_de_usar_latest():
+    texto = CI.read_text(encoding="utf-8")
+    assert "-latest" not in texto
+    assert texto.count("runs-on: ubuntu-24.04") >= 2
