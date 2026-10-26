@@ -65,7 +65,8 @@ O segundo comando remove só o contêiner da API. Nunca use `docker compose down
 
 - Os dados são um **retrato**: o último run do pipeline foi em 15/09 e a causa da parada não foi investigada. O job não
   deve ser rodado de novo sem entender que `vigente` e `ativo` dependem de `CURRENT_DATE()`.
-- Não se sabe se os dados de origem são sintéticos.
+- Os dados de origem são, com quase certeza, sintéticos (veja "Sobre os dados" no [README](../README.md)); é uma
+  conclusão por evidência, não uma confirmação da origem.
 - Muitos produtos têm snapshot de estoque anterior ao global (a API sinaliza com `defasado`).
 - A API não tem autenticação e só escuta em `127.0.0.1`: não a exponha na rede assim.
 - O perfil e o identificador do warehouse do Databricks estão fixos em `carga/extracao.py`.

@@ -13,6 +13,15 @@ Databricks (gold/silver)  --carga (python -m carga.executar)-->  PostgreSQL (6 t
 Por que existe e as decisões de projeto: [docs/decisoes.md](docs/decisoes.md). Como operar no dia a dia e o que
 fazer quando algo falha: [docs/operacao.md](docs/operacao.md).
 
+## Sobre os dados
+
+Os dados de origem (`dados/`, CSV de CRM e ERP) são, com quase certeza, **sintéticos**: não vêm de uma empresa real.
+Evidências medidas nos arquivos: os dígitos verificadores dos CNPJs só estão corretos em 28 de 3.040 clientes (o que o
+acaso dá; num CNPJ real seriam todos); os identificadores são sequenciais e sem lacunas (`cliente_id` de 1 a 3040,
+`SKU00001` a `SKU00292`); os nomes de clientes vêm de um vocabulário de 53 palavras; e há só 12 cidades. O CSV tem 3.040
+clientes e 3.000 raízes de CNPJ distintas, e a `dim_cliente` do Gold tem 3.000. É uma conclusão por evidência, não uma
+confirmação da origem.
+
 ## O que você precisa
 
 - Docker Desktop e o [uv](https://docs.astral.sh/uv/).
