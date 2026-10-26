@@ -1,0 +1,1621 @@
+{
+  "datasets": [
+    {
+      "name": "fato_vendas",
+      "displayName": "Fato Vendas",
+      "config": {
+        "version": "1.1",
+        "source": "lakehouse_rotaperfume.gold.fato_vendas",
+        "dimensions": [
+          {
+            "name": "data_pedido",
+            "expr": "data_pedido",
+            "displayName": "Data do Pedido"
+          },
+          {
+            "name": "ano_pedido",
+            "expr": "YEAR(data_pedido)",
+            "displayName": "Ano"
+          },
+          {
+            "name": "mes_pedido",
+            "expr": "DATE_TRUNC('MONTH', data_pedido)",
+            "displayName": "Mês do Pedido"
+          },
+          {
+            "name": "segmento",
+            "expr": "segmento",
+            "displayName": "Segmento"
+          },
+          {
+            "name": "cidade",
+            "expr": "cidade",
+            "displayName": "Cidade"
+          },
+          {
+            "name": "marca",
+            "expr": "marca",
+            "displayName": "Marca"
+          },
+          {
+            "name": "categoria",
+            "expr": "categoria",
+            "displayName": "Categoria"
+          },
+          {
+            "name": "canal",
+            "expr": "canal",
+            "displayName": "Canal"
+          },
+          {
+            "name": "razao_social",
+            "expr": "razao_social",
+            "displayName": "Razão Social"
+          },
+          {
+            "name": "pedido_id",
+            "expr": "pedido_id",
+            "displayName": "ID do Pedido"
+          }
+        ],
+        "measures": [
+          {
+            "name": "receita_total",
+            "expr": "SUM(receita)",
+            "displayName": "Receita Total",
+            "format": {
+              "type": "currency",
+              "currencyCode": "BRL",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 2.0
+              }
+            }
+          },
+          {
+            "name": "margem_total",
+            "expr": "SUM(margem)",
+            "displayName": "Margem Total",
+            "format": {
+              "type": "currency",
+              "currencyCode": "BRL",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 2.0
+              }
+            }
+          },
+          {
+            "name": "num_pedidos",
+            "expr": "COUNT(DISTINCT pedido_id)",
+            "displayName": "Número de Pedidos"
+          },
+          {
+            "name": "ticket_medio",
+            "expr": "SUM(receita) / COUNT(DISTINCT pedido_id)",
+            "displayName": "Ticket Médio",
+            "format": {
+              "type": "currency",
+              "currencyCode": "BRL",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 2.0
+              }
+            }
+          },
+          {
+            "name": "margem_percentual",
+            "expr": "100 * SUM(margem) / NULLIF(SUM(receita), 0)",
+            "displayName": "Margem Percentual",
+            "format": {
+              "type": "percentage",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 2.0
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "fila_semanal",
+      "displayName": "Fila Semanal",
+      "config": {
+        "version": "1.1",
+        "source": "lakehouse_rotaperfume.gold.fila_semanal",
+        "dimensions": [
+          {
+            "name": "ordem",
+            "expr": "ordem",
+            "displayName": "Ordem"
+          },
+          {
+            "name": "vendedor",
+            "expr": "vendedor",
+            "displayName": "Vendedor"
+          },
+          {
+            "name": "cliente_id",
+            "expr": "cliente_id",
+            "displayName": "ID do Cliente"
+          },
+          {
+            "name": "razao_social",
+            "expr": "razao_social",
+            "displayName": "Razão Social"
+          },
+          {
+            "name": "cidade",
+            "expr": "cidade",
+            "displayName": "Cidade"
+          },
+          {
+            "name": "uf",
+            "expr": "uf",
+            "displayName": "UF"
+          },
+          {
+            "name": "score",
+            "expr": "score",
+            "displayName": "Score",
+            "format": {
+              "type": "number",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 4.0
+              }
+            }
+          },
+          {
+            "name": "faixa",
+            "expr": "faixa",
+            "displayName": "Faixa"
+          },
+          {
+            "name": "ticket_medio",
+            "expr": "ticket_medio",
+            "displayName": "Ticket Médio",
+            "format": {
+              "type": "currency",
+              "currencyCode": "BRL",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 2.0
+              }
+            }
+          },
+          {
+            "name": "motivo",
+            "expr": "motivo",
+            "displayName": "Motivo"
+          },
+          {
+            "name": "sugestao",
+            "expr": "sugestao",
+            "displayName": "Sugestão"
+          }
+        ],
+        "measures": [
+          {
+            "name": "total_contatos",
+            "expr": "COUNT(*)",
+            "displayName": "Total de Contatos"
+          },
+          {
+            "name": "vendedores_distintos",
+            "expr": "COUNT(DISTINCT vendedor)",
+            "displayName": "Vendedores Distintos"
+          },
+          {
+            "name": "score_medio",
+            "expr": "AVG(score)",
+            "displayName": "Score Médio",
+            "format": {
+              "type": "number",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 4.0
+              }
+            }
+          },
+          {
+            "name": "muito_quente_count",
+            "expr": "COUNT(*) FILTER (WHERE faixa = 'Muito quente')",
+            "displayName": "Clientes Muito Quente"
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_20_clientes",
+      "displayName": "Top 20 Clientes por Receita",
+      "queryLines": [
+        "WITH top_clientes AS (\n",
+        "  SELECT\n",
+        "    razao_social,\n",
+        "    SUM(receita) as receita_total\n",
+        "  FROM\n",
+        "    lakehouse_rotaperfume.gold.fato_vendas\n",
+        "  GROUP BY\n",
+        "    razao_social\n",
+        "  ORDER BY\n",
+        "    receita_total DESC\n",
+        "  LIMIT 20\n",
+        ")\n",
+        "SELECT\n",
+        "  razao_social,\n",
+        "  receita_total\n",
+        "FROM\n",
+        "  top_clientes\n",
+        "ORDER BY\n",
+        "  receita_total DESC"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "195df628",
+      "displayName": "Visão Comercial",
+      "layout": [
+        {
+          "widget": {
+            "name": "filtro_ano",
+            "queries": [
+              {
+                "name": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dbad1e6888dea64d135d2362_ano_pedido",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "ano_pedido",
+                      "expression": "`ano_pedido`"
+                    },
+                    {
+                      "name": "ano_pedido_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Ano",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "ano_pedido",
+                    "queryName": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dbad1e6888dea64d135d2362_ano_pedido"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filtro_segmento",
+            "queries": [
+              {
+                "name": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dbad1e6888dea64d135d2362_segmento",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "segmento",
+                      "expression": "`segmento`"
+                    },
+                    {
+                      "name": "segmento_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Segmento"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "segmento",
+                    "queryName": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dbad1e6888dea64d135d2362_segmento"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filtro_cidade",
+            "queries": [
+              {
+                "name": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dbad1e6888dea64d135d2362_cidade",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "cidade",
+                      "expression": "`cidade`"
+                    },
+                    {
+                      "name": "cidade_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Cidade"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "cidade",
+                    "queryName": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dbad1e6888dea64d135d2362_cidade"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_receita",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "measure(receita_total)",
+                      "expression": "MEASURE(`receita_total`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Receita Total"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(receita_total)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_margem",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "measure(margem_total)",
+                      "expression": "MEASURE(`margem_total`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Margem Total"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(margem_total)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 4,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_pedidos",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "measure(num_pedidos)",
+                      "expression": "MEASURE(`num_pedidos`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Número de Pedidos"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(num_pedidos)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 4,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_ticket",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "measure(ticket_medio)",
+                      "expression": "MEASURE(`ticket_medio`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ticket Médio"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(ticket_medio)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 4,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "receita_mes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "monthly(mes_pedido)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `mes_pedido`)"
+                    },
+                    {
+                      "name": "measure(receita_total)",
+                      "expression": "MEASURE(`receita_total`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Receita por Mês"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(mes_pedido)",
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(receita_total)",
+                  "displayName": "receita_total",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "receita_canal",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "measure(receita_total)",
+                      "expression": "MEASURE(`receita_total`)"
+                    },
+                    {
+                      "name": "canal",
+                      "expression": "`canal`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Receita por Canal"
+              },
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "measure(receita_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "receita_total"
+                },
+                "color": {
+                  "fieldName": "canal",
+                  "displayName": "canal",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "top_10_marcas",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "marca",
+                      "expression": "`marca`"
+                    },
+                    {
+                      "name": "measure(receita_total)",
+                      "expression": "MEASURE(`receita_total`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 Marcas por Receita"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "marca",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(receita_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "margem_por_categoria",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fato_vendas",
+                  "fields": [
+                    {
+                      "name": "categoria",
+                      "expression": "`categoria`"
+                    },
+                    {
+                      "name": "measure(margem_percentual)",
+                      "expression": "MEASURE(`margem_percentual`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Margem Percentual por Categoria"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "categoria",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(margem_percentual)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 16,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "top_20_clientes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_20_clientes",
+                  "fields": [
+                    {
+                      "name": "razao_social",
+                      "expression": "`razao_social`"
+                    },
+                    {
+                      "name": "sum(receita_total)",
+                      "expression": "SUM(`receita_total`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 20 Clientes por Receita",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "razao_social",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(receita_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 24,
+            "width": 12,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "fila_semanal",
+      "displayName": "Fila da Semana",
+      "layout": [
+        {
+          "widget": {
+            "name": "filtro_vendedor",
+            "queries": [
+              {
+                "name": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dcd21f5289772a877dbedc71_vendedor",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "vendedor",
+                      "expression": "`vendedor`"
+                    },
+                    {
+                      "name": "vendedor_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Vendedor"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "vendedor",
+                    "queryName": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dcd21f5289772a877dbedc71_vendedor"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filtro_faixa",
+            "queries": [
+              {
+                "name": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dcd21f5289772a877dbedc71_faixa",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "faixa",
+                      "expression": "`faixa`"
+                    },
+                    {
+                      "name": "faixa_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Faixa"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "faixa",
+                    "queryName": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dcd21f5289772a877dbedc71_faixa"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filtro_cidade",
+            "queries": [
+              {
+                "name": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dcd21f5289772a877dbedc71_cidade",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "cidade",
+                      "expression": "`cidade`"
+                    },
+                    {
+                      "name": "cidade_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Cidade"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "cidade",
+                    "queryName": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dcd21f5289772a877dbedc71_cidade"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filtro_uf",
+            "queries": [
+              {
+                "name": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dcd21f5289772a877dbedc71_uf",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    },
+                    {
+                      "name": "uf_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "UF"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "uf",
+                    "queryName": "dashboards/01f1a6d4ae8a17979662695e33a5dfcd/datasets/01f1a6d4dcd21f5289772a877dbedc71_uf"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_contatos",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "measure(total_contatos)",
+                      "expression": "MEASURE(`total_contatos`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total de Contatos"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(total_contatos)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_vendedores",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "measure(vendedores_distintos)",
+                      "expression": "MEASURE(`vendedores_distintos`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Vendedores Distintos"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(vendedores_distintos)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 4,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_score",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "measure(score_medio)",
+                      "expression": "MEASURE(`score_medio`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Score Médio"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(score_medio)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 4,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_muito_quente",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "measure(muito_quente_count)",
+                      "expression": "MEASURE(`muito_quente_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Clientes Muito Quente"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(muito_quente_count)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 4,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "contatos_por_vendedor",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "vendedor",
+                      "expression": "`vendedor`"
+                    },
+                    {
+                      "name": "measure(total_contatos)",
+                      "expression": "MEASURE(`total_contatos`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Quantidade de Contatos por Vendedor"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "vendedor",
+                  "displayName": "vendedor",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_contatos)",
+                  "displayName": "total_contatos",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "vendedor",
+                  "displayName": "vendedor",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "distribuicao_faixa",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "measure(total_contatos)",
+                      "expression": "MEASURE(`total_contatos`)"
+                    },
+                    {
+                      "name": "faixa",
+                      "expression": "`faixa`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Distribuição por Faixa"
+              },
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "measure(total_contatos)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "total_contatos"
+                },
+                "color": {
+                  "fieldName": "faixa",
+                  "displayName": "faixa",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "score_por_vendedor",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "vendedor",
+                      "expression": "`vendedor`"
+                    },
+                    {
+                      "name": "measure(score_medio)",
+                      "expression": "MEASURE(`score_medio`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Score Médio por Vendedor"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "vendedor",
+                  "displayName": "vendedor",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(score_medio)",
+                  "displayName": "score_medio",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "vendedor",
+                  "displayName": "vendedor",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "tabela_detalhada",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fila_semanal",
+                  "fields": [
+                    {
+                      "name": "ordem",
+                      "expression": "`ordem`"
+                    },
+                    {
+                      "name": "vendedor",
+                      "expression": "`vendedor`"
+                    },
+                    {
+                      "name": "cliente_id",
+                      "expression": "`cliente_id`"
+                    },
+                    {
+                      "name": "razao_social",
+                      "expression": "`razao_social`"
+                    },
+                    {
+                      "name": "cidade",
+                      "expression": "`cidade`"
+                    },
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    },
+                    {
+                      "name": "score",
+                      "expression": "`score`"
+                    },
+                    {
+                      "name": "faixa",
+                      "expression": "`faixa`"
+                    },
+                    {
+                      "name": "ticket_medio",
+                      "expression": "`ticket_medio`"
+                    },
+                    {
+                      "name": "motivo",
+                      "expression": "`motivo`"
+                    },
+                    {
+                      "name": "sugestao",
+                      "expression": "`sugestao`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Detalhamento da Fila"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "ordem"
+                  },
+                  {
+                    "fieldName": "vendedor"
+                  },
+                  {
+                    "fieldName": "cliente_id"
+                  },
+                  {
+                    "fieldName": "razao_social"
+                  },
+                  {
+                    "fieldName": "cidade"
+                  },
+                  {
+                    "fieldName": "uf"
+                  },
+                  {
+                    "fieldName": "score"
+                  },
+                  {
+                    "fieldName": "faixa"
+                  },
+                  {
+                    "fieldName": "ticket_medio"
+                  },
+                  {
+                    "fieldName": "motivo"
+                  },
+                  {
+                    "fieldName": "sugestao"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 24,
+            "width": 12,
+            "height": 12
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#05020B",
+        "dark": "#05020B"
+      },
+      "widgetBackgroundColor": {
+        "light": "#0A0412",
+        "dark": "#0A0412"
+      },
+      "widgetBorderColor": {
+        "light": "#8B5CF6",
+        "dark": "#8B5CF6"
+      },
+      "selectionColor": {
+        "light": "#8B5CF6",
+        "dark": "#8B5CF6"
+      },
+      "visualizationColors": [
+        "#8B5CF6",
+        "#A855F7",
+        "#7C3AED",
+        "#C084FC",
+        "#9333EA",
+        "#D8B4FE"
+      ],
+      "widgetHeaderAlignment": "LEFT",
+      "widgetPadding": 16,
+      "widgetMargin": 12,
+      "widgetCornerRadius": 8,
+      "widgetShadow": 8,
+      "continuousGradient": {
+        "lightMode": {
+          "customSequential": {
+            "start": "#D8B4FE",
+            "end": "#6B21A8"
+          }
+        },
+        "darkMode": {
+          "customSequential": {
+            "start": "#D8B4FE",
+            "end": "#6B21A8"
+          }
+        }
+      },
+      "fontSettings": {
+        "base": {
+          "fontFamily": "Inter",
+          "fontColor": {
+            "light": "#F3F4F6",
+            "dark": "#F3F4F6"
+          },
+          "fontSize": 13
+        },
+        "widgetTitle": {
+          "fontColor": {
+            "light": "#FFFFFF",
+            "dark": "#FFFFFF"
+          },
+          "fontSize": 14,
+          "fontWeight": 600
+        },
+        "widgetDescription": {
+          "fontColor": {
+            "light": "#9CA3AF",
+            "dark": "#9CA3AF"
+          },
+          "fontSize": 12
+        },
+        "fieldTitle": {
+          "fontColor": {
+            "light": "#D1D5DB",
+            "dark": "#D1D5DB"
+          },
+          "fontSize": 11,
+          "fontWeight": 500
+        },
+        "fieldValue": {
+          "fontColor": {
+            "light": "#FFFFFF",
+            "dark": "#FFFFFF"
+          },
+          "fontSize": 24,
+          "fontWeight": 600
+        }
+      },
+      "gridLineColor": {
+        "light": "#1A0F2E",
+        "dark": "#1A0F2E"
+      },
+      "axisLineColor": {
+        "light": "#4B5563",
+        "dark": "#4B5563"
+      }
+    },
+    "applyModeEnabled": false
+  }
+}
